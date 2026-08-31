@@ -12,7 +12,6 @@ export default async function handler(req, res) {
     return res.status(200).send("Please provide a prompt! Usage: !chatmbr <question> or !ai <question>");
   }
 
-  // Limit memory to the last 6 messages (3 user prompts + 3 bot replies)
   if (chatHistory.length > 6) {
     chatHistory = chatHistory.slice(-6);
   }
@@ -66,6 +65,12 @@ Keep answers helpful, energetic, strictly plain text under ${maxChars} character
     });
 
     const data = await response.json();
+
+    // Check for rate limit status (429) or token limit errors in the payload
+    if (response.status === 429 || data.error?.code === 'rate_limit_exceeded') {
+      return res.status(200).send("ChatMBR has temporarily reached its API token quota limit! Please try again shortly.");
+    }
+
     let reply = data.choices?.[0]?.message?.content || "No response from ChatMBR.";
 
     if (reply.length > maxChars) {
@@ -78,6 +83,6 @@ Keep answers helpful, energetic, strictly plain text under ${maxChars} character
 
     res.status(200).send(reply);
   } catch (error) {
-    res.status(200).send("Error connecting to ChatMBR.");
+    res.status(200).send("ChatMBR is currently offline due to high traffic! Please try again in a bit.");
   }
 }
