@@ -12,8 +12,9 @@ export default async function handler(req, res) {
     return res.status(200).send("Please provide a prompt! Usage: !chatmbr <question> or !ai <question>");
   }
 
-  if (chatHistory.length > 6) {
-    chatHistory = chatHistory.slice(-6);
+  // Limit memory to the last 4 messages to optimize token usage
+  if (chatHistory.length > 4) {
+    chatHistory = chatHistory.slice(-4);
   }
 
   try {
