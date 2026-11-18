@@ -3,7 +3,7 @@
 // Zero dependencies. Requires Node.js 18+ (global fetch).
 // Wraps the serverless-style handler in chat.js as an always-on server.
 //
-// Env vars:
+// Env vars (from the panel or a .env file next to server.js):
 //   GROQ_API_KEY       (required) Groq API key
 //   SERVER_PORT / PORT (optional) port to listen on, default 3000
 //   DEFAULT_CHAR_LIMIT (optional) read by chat.js
@@ -12,7 +12,21 @@
 //   http://YOUR-HOST:PORT/api/chat?query=hello&user=Theme&platform=twitch
 
 import http from "node:http";
-import handler from "./api/chat.js";
+
+// ---- load .env (optional) ----
+// Must run BEFORE chat.js is imported, because chat.js reads
+// DEFAULT_CHAR_LIMIT at import time. Panel variables still work as a fallback,
+// and values already set by the panel are NOT overwritten by .env.
+try {
+  process.loadEnvFile(".env");
+  console.log("[server] Loaded .env file.");
+} catch (err) {
+  if (err && err.code !== "ENOENT") {
+    console.warn("[server] Could not read .env:", err.message);
+  }
+}
+
+const { default: handler } = await import("./api/chat.js");
 
 const PORT = parseInt(process.env.SERVER_PORT || process.env.PORT, 10) || 3000;
 const HOST = "0.0.0.0";
