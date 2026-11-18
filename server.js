@@ -12,7 +12,7 @@
 //   http://YOUR-HOST:PORT/api/chat?query=hello&user=Theme&platform=twitch
 
 import http from "node:http";
-import handler from "./chat.js";
+import handler from "./api/chat.js";
 
 const PORT = parseInt(process.env.SERVER_PORT || process.env.PORT, 10) || 3000;
 const HOST = "0.0.0.0";
